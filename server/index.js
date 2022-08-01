@@ -6,16 +6,14 @@ const userRoute = require("./routes/user");
 
 dotenv.config();
 
-
-
 const res = mongoose
-  .connect(
-    process.env.MONGO_URL)
+  .connect(process.env.MONGO_URL)
   .then(() => console.log("DBConnection Succssefuly"))
   .catch((err) => {
-    console.log(err)});
+    console.log(err);
+  });
 
-app.use("/api/user",userRoute);
+app.use(express.json());
+app.use("/api/users", userRoute);
 
-app
-  .listen(process.env.PORT|| 5000, () => console.log("Server is Running"));
+app.listen(process.env.PORT || 5000, () => console.log("Server is Running"));
