@@ -48,6 +48,7 @@ const login = async (req, res) => {
   } catch (err) {
     res.status(500).json(err);
   }
+  
 };
 
 module.exports = {
