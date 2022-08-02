@@ -1,36 +1,99 @@
 const jwt = require("jsonwebtoken");
-
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.token;
-  if (authHeader) {
-    jwt.verify(token,process.env.JWT_SEC,(err,user)=>{
-        if(err) res.status(403).json("Token is not valid");
-        req.user = user;
-        next();
+const CryptoJS = require("crypto-js");
+const User = require("../models/User");
 
 
+//UPDATE:
+const updateUser = async (req, res) => {
+  if (req.body.password) {
+    req.body.password = CryptoJS.AES.encrypt(
+      req.body.password,
+      process.env.PASS_SEC
+    ).toString();
+  }
 
-    })
-  } else {
-    return res.status(401).json("You are not authenticated");
+  try {
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, {
+      $set: req.body
+    }, { new: true })
+    res.status(200).json(updatedUser);
+  }
+  catch (err) { res.status(500).json(err) }
+
+};
+
+
+//DELETE:
+const deleteUser = async (req, res) => {
+
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json("User has been deleted...");
+  } catch (err) {
+    res.status(500).json(err);
   }
 };
 
+//-------GET USER------------:
+const getUser = async (req, res) => {
 
-const verifyTokenAndAuthorization = (req, res, next) => {
-    verifyToken(req,res,()=>{
-        const idFromDB = req.user.id;
-        const idParamsReq = req.params.id;
-        if(idFromDB === idParamsReq || req.user.isAdmin)
-        { 
-
-        }
-    })
-
+  try {
+    const user = await User.findById(req.params.id);
+    const { password, ...others } = user._doc;
+    res.status(200).json(others);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
+//---------GET ALL USERS-----------:
+const getAllUsers = async (req, res) => {
+
+  const query = req.query.new;
+  try {
+    const users = query
+      ? await User.find().sort({ _id: -1 }).limit(5)
+      : await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+//----------------GET USERS STATS--------:
+const getUsersStats = async (req, res) => {
+
+
+  const date = new Date();
+  const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
+
+  try {
+    const data = await User.aggregate([
+      { $match: { createdAt: { $gte: lastYear } } },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          total: { $sum: 1 },
+        },
+      },
+    ]);
+    res.status(200).json(data)
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
+
+
 module.exports = {
-    verifyToken,
-    
-  };
-  
+  updateUser,
+  deleteUser,
+  getUser,
+  getAllUsers,
+  getUsersStats
+
+};
