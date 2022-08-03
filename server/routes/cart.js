@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const {verifyTokenAndAuthorization, verifyTokenAndAdmin,verifyToken } = require("../controllers/verifyToken");
-const {createProduct,updateProduct,deleteProduct,getProduct,getAllProducts} = require("../controllers/cart");
+const {createCart,updateCart,deleteCart,getCart,getAllCarts} = require("../controllers/cart");
 
-router.post("/", verifyToken,createCart );// CREATE PRODUCT
-// router.put("/:id", verifyTokenAndAdmin,updateProduct );// UPDATE PRODUCT
-// router.delete("/:id", verifyTokenAndAdmin,deleteProduct );// DELETE PRODUCT
-// router.get("/find/:id",getProduct );// GET PRODUCT
-// router.get("/",getAllProducts );// GET ALL PRODUCTS
+router.post("/", verifyToken,createCart );// CREATE CART
+router.put("/:id", verifyTokenAndAuthorization,updateCart );// UPDATE CART
+router.delete("/:id", verifyTokenAndAuthorization,deleteCart );// DELETE CART
+router.get("/find/:userId",verifyTokenAndAuthorization,getCart );// GET PRODUCT
+ router.get("/",verifyTokenAndAdmin,getAllCarts );// GET ALL PRODUCTS
 
 module.exports = router;

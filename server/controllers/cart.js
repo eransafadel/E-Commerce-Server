@@ -1,4 +1,4 @@
-const Product = require("../models/Product");
+const Cart = require("../models/Cart");
 
 //-------CERATE CART------------:
 const createCart = async (req, res) => {
@@ -15,38 +15,38 @@ const createCart = async (req, res) => {
 
 
 //-------UPDATE PRODUCT------------:
-const updateProduct = async (req, res) => {
+const updateCart = async (req, res) => {
 
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(
+        const updatedCart = await Cart.findByIdAndUpdate(
             req.params.id, {
             $set: req.body
         }, { new: true })
-        res.status(200).json(updatedProduct);
+        res.status(200).json(Cart);
     }
     catch (err) { res.status(500).json(err) }
 };
 
 
-//----------DELETE PRODUCT------:
-const deleteProduct = async (req, res) => {
+//----------DELETE CART------:
+const deleteCart = async (req, res) => {
 
     try {
-        await Product.findByIdAndDelete(req.params.id);
-        res.status(200).json("Product has been deleted...");
+        await Cart.findByIdAndDelete(req.params.id);
+        res.status(200).json("Cart has been deleted...");
     } catch (err) {
         res.status(500).json(err);
     }
 };
 
 
-//-------GET PRODUCT--------------
-const getProduct = async (req, res) => {
+//-------GET USER CART--------------
+const getCart = async (req, res) => {
 
     try {
-        const product = await Product.findById(req.params.id);
+        const cart = await Cart.findOne({ userId: req.params.userId });
 
-        res.status(200).json(product);
+        res.status(200).json(cart);
     } catch (err) {
         res.status(500).json(err);
     }
@@ -54,35 +54,23 @@ const getProduct = async (req, res) => {
 
 
 //---------GET ALL PRODUCTS-----------:
-const getAllProducts = async (req, res) => {
-
-    const qNew = req.query.new;
-    const qCategory = req.query.category;
+const getAllCarts = async (req, res) => {
     try {
-        let products;
-
-        if (qNew) {
-            products = await Product.find().sort({ createdAt: -1 }).limit(1);
-        } else if (qCategory) {
-            products = await Product.find({
-                categories: {
-                    $in: [qCategory],
-                },
-            });
-        } else {
-            products = await Product.find();
-        }
-
-        res.status(200).json(products);
+        const carts = await Cart.find();
+        res.status(200).json(carts);
     } catch (err) {
         res.status(500).json(err);
     }
 };
 
 
-
 module.exports = {
     createCart,
-   
+    updateCart,
+    deleteCart,
+    getCart,
+    getAllCarts
+
+
 
 };
