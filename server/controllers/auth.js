@@ -25,13 +25,19 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const user = await User.findOne({ username: req.body.username });
-    !user && res.status(401).json("Wrong Credentials");
+    if(!user||user===null)
+    {
+       res.status(401).json("Wrong Credentials");
+    }
+    if(user)
+    {
     const originPassword = CryptoJS.AES.decrypt(
       user.password,
       process.env.PASS_SEC
     ).toString(CryptoJS.enc.Utf8);
     originPassword !== req.body.password &&
       res.status(401).json("Wrong Credentials");
+    
 
     const accessToken = jwt.sign(
       {
@@ -44,6 +50,7 @@ const login = async (req, res) => {
 
     const { password, ...others } = user._doc;
     res.status(200).json({ ...others, accessToken });
+    }
   } catch (err) {
     res.status(500).json(err);
   }
