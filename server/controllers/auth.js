@@ -10,6 +10,7 @@ const register = async (req, res) => {
       req.body.password,
       process.env.PASS_SEC
     ).toString(),
+    image:req.body.image
   });
 
   try {
